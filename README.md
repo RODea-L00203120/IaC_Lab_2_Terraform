@@ -65,11 +65,17 @@ graph TB
     style S3 fill:#4caf50,stroke:#333,stroke-width:2px
 ```
 
-# Design decisions: 
+# Early Design decisions: 
 
 - Create a dev container for version locking, portability and maintainability.
 
-- Use terraform locally through the CLI, avoid cloud implementations and instead store state configuration files on a private S3 bucket. Less provider dependence, similar security, greater flexibility and portability.
+- Use terraform locally through the CLI, avoid vendor locked cloud implementation and instead store state configuration files on a private S3 bucket. Less provider dependence, similar security, greater flexibility and portability.
 
-- Update when container is configured - 
+- Modular design for: VPC, ALB, EKS clusters, RDS & Security Group configuration
+
+- Simple Python Flask App - Hello world to begin, then form submission to DB
+
+- Aiming to implement multi-cluster cluster approach; first get one cluster working
+
+
 
