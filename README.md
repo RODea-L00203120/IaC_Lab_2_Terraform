@@ -64,3 +64,12 @@ graph TB
     style RDS fill:#9c27b0,stroke:#333,stroke-width:2px,color:#fff
     style S3 fill:#4caf50,stroke:#333,stroke-width:2px
 ```
+
+# Design decisions: 
+
+- Create a dev container for version locking, portability and maintainability.
+
+- Use terraform locally through the CLI, avoid cloud implementations and instead store state configuration files on a private S3 bucket. Less provider dependence, similar security, greater flexibility and portability.
+
+- Update when container is configured - 
+
