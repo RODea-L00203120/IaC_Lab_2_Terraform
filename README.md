@@ -111,7 +111,7 @@ A branch was created to implement two EC2 instances on public networks, from the
 
 Examples of variables configured as per the brief instructions in `terraform/variables.tf` include: 
 
-``` json
+```hcl
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string
