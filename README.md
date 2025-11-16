@@ -94,7 +94,6 @@ Rather than rely on cloud tooling (Terraform HCP) to track state changes the aut
 
 ![](screenshots/2025-11-16-15-05-21.png)
 
-![](screenshots/2025-11-16-12-43-04.png)
 
 ## Stage 1: Simple Infrastructure set-up
 
@@ -102,5 +101,29 @@ The author intended modularity to be a core design element for this lab and incr
 
 A branch was created to implement two EC2 instances on public networks, from there the following could be implemented:
 
-- A VPC module, configurable via the terraform/variables.tf file which pass to:
-    terraform/modules/vpc/main.tf         ← VPC module receives them
+- A VPC module, configurable via the `terraform/variables.tf` file which pass to the vpc module `terraform/modules/vpc/main.tf` as required. 
+
+- An EC2 module which retrieves the latest AWS-Linux 2023 AMI and allows for configuration of instances via variables passed from the `terraform/variables.tf` file
+
+Examples of variables configured as per the brief instructions in `terraform/variables.tf` include: 
+
+``` json
+variable "vpc_cidr" {
+  description = "CIDR block for VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "availability_zones" {
+  description = "List of availability zones"
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b"]
+}
+
+variable "public_subnet_cidrs" {
+  description = "CIDR blocks for public subnets"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+```
+
