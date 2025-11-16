@@ -1,15 +1,17 @@
 # IaC_Lab_2_Terraform
+
 Repository in support of academic report for Lab 2's prescribed topic.
 
-This repository provides a means of Version Control and evidences the following: 
+This repository provides a means of Version Control and evidences the following:
 
-The authors engagement in practitioner-based research in effort to compose a IaC solution for a hypothetical DevOps pipeline. 
+The authors engagement in practitioner-based research in effort to compose a IaC solution for a hypothetical DevOps pipeline.
 
-- The proposed scenario is the provision of infrastructure for the deployment of a feedback mechanism for employees in an organization. 
+- The proposed scenario is the provision of infrastructure for the deployment of a feedback mechanism for employees in an organization.
 
 - While the landing page is simplistic (a form), reliability, security, modularity and scalability are of concern and therefore the underlying architecture design aimed for is as follows:
 
-# Infrastructure Architecture
+## Infrastructure Architecture
+
 ```mermaid
 graph TB
     subgraph Internet["Internet Layer"]
@@ -65,7 +67,7 @@ graph TB
     style S3 fill:#4caf50,stroke:#333,stroke-width:2px
 ```
 
-# Early Design decisions: 
+## Early Design decisions
 
 - Create a dev container for version locking, portability and maintainability.
 
@@ -75,7 +77,30 @@ graph TB
 
 - Simple Python Flask App - Hello world to begin, then form submission to DB
 
-- Aiming to implement multi-cluster cluster approach; first get one cluster working
+- Aiming to implement multi-cluster cluster approach however:
 
+1. Get EC2 instances working with correctly configured VPC, ALB, Security, RDS in own branch.
+
+2. Branch off  above to work on single-cluster EKS implementation
+
+3. Branch off above to work on multi-cluster implementation
+
+4. Merge most successful to main
+
+# State Tracking
+
+While of less concern as a solo developer, best practice indicates a method of tracking the state of terraform IaC changes is required when working with others to avoid conflicts, corruptions, race conditions etc. 
+Rather than rely on cloud tooling (Terraform HCP) to track state changes the author investigated alternatives and encountered the concept of provisioning a private, encrypted S3 bucket to store an organizations `terraform.tfstate` file. A script file is included which runs through this process. Below are evidence of this working: 
+
+![](screenshots/2025-11-16-15-05-21.png)
 
 ![](screenshots/2025-11-16-12-43-04.png)
+
+## Stage 1: Simple Infrastructure set-up
+
+The author intended modularity to be a core design element for this lab and incrementally developed the application.
+
+A branch was created to implement two EC2 instances on public networks, from there the following could be implemented:
+
+- A VPC module, configurable via the terraform/variables.tf file which pass to:
+    terraform/modules/vpc/main.tf         ← VPC module receives them
