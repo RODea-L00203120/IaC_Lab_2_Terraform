@@ -90,7 +90,11 @@ graph TB
 # State Tracking
 
 While of less concern as a solo developer, best practice indicates a method of tracking the state of terraform IaC changes is required when working with others to avoid conflicts, corruptions, race conditions etc. 
-Rather than rely on cloud tooling (Terraform HCP) to track state changes the author investigated alternatives and encountered the concept of provisioning a private, encrypted S3 bucket to store an organizations `terraform.tfstate` file. A script file is included which runs through this process. Below are evidence of this working: 
+Rather than rely on cloud tooling (Terraform HCP) to track state changes the author investigated alternatives and encountered the concept of provisioning a private, encrypted S3 bucket to store an organizations `terraform.tfstate` file. A script file is included which runs through this process. *Note: as this is container based the visible user name is the default docker debian container root*
+
+Below are evidence of this working:
+
+![](screenshots/2025-11-16-16-33-35.png)
 
 ![](screenshots/2025-11-16-15-05-21.png)
 
@@ -126,4 +130,5 @@ variable "public_subnet_cidrs" {
   default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 ```
+
 
