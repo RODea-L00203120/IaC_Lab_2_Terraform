@@ -78,4 +78,4 @@ graph TB
 - Aiming to implement multi-cluster cluster approach; first get one cluster working
 
 
-
+![](screenshots/2025-11-16-12-43-04.png)
