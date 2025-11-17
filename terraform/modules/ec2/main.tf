@@ -20,10 +20,11 @@ resource "aws_instance" "web" {
   instance_type               = var.instance_type
   subnet_id                   = var.subnet_ids[count.index]
   associate_public_ip_address = true
+  vpc_security_group_ids      = [var.security_group_id]
 
-   user_data_base64 = base64encode(var.user_data)
+  user_data_base64 = base64encode(var.user_data)
   
- # user_data = var.user_data  
+
 
   tags = {
     Name      = "${var.project_name}-web-${count.index + 1}"

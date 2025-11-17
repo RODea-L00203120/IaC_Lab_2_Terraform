@@ -30,3 +30,8 @@ variable "instance_count" {
   type        = number
   default     = 2
 }
+
+variable "security_group_id" {
+  description = "Security group ID for EC2 instances"
+  type        = string
+}
