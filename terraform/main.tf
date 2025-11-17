@@ -22,21 +22,25 @@ provider "aws" {
 }
 
 
-# VPC Module
 module "vpc" {
   source = "./modules/vpc"
-
+  
   project_name         = var.project_name
-  vpc_cidr             = var.vpc_cidr
-  availability_zones   = var.availability_zones
-  public_subnet_cidrs  = var.public_subnet_cidrs
+  vpc_cidr            = var.vpc_cidr
+  availability_zones  = var.availability_zones
+  public_subnet_cidrs = var.public_subnet_cidrs
 }
 
-# EC2 Module
 module "ec2" {
   source = "./modules/ec2"
+  
   project_name       = var.project_name
+  instance_count     = 2
   instance_type      = "t3.micro"
   subnet_ids         = module.vpc.public_subnets
-  availability_zones = var.availability_zones
+  availability_zones = var.availability_zones 
+  
+ # user_data = templatefile("${path.root}/../app/user_data.sh", {
+   # flask_app_code = file("${path.root}/../app/app.py")
+#  })
 }

@@ -18,12 +18,12 @@ output "internet_gateway_id" {
   value       = module.vpc.igw_id
 }
 
-output "web1_public_ip" {
-  description = "Web server 1 public IP"
-  value       = module.ec2.web1_public_ip
+output "instance_ids" {
+  description = "List of EC2 instance IDs"
+  value       = module.ec2.instance_ids
 }
 
-output "web2_public_ip" {
-  description = "Web server 2 public IP"
-  value       = module.ec2.web2_public_ip
+output "public_ips" {
+  description = "List of EC2 public IPs"
+  value       = module.ec2.public_ips
 }

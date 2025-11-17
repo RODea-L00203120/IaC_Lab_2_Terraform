@@ -14,28 +14,21 @@ data "aws_ami" "amazon_linux_2023" {
   }
 }
 
-# EC2 Instance 1 (AZ1)
-resource "aws_instance" "web1" {
+resource "aws_instance" "web" {
+  count                       = var.instance_count
   ami                         = data.aws_ami.amazon_linux_2023.id
   instance_type               = var.instance_type
-  subnet_id                   = var.subnet_ids[0]
+  subnet_id                   = var.subnet_ids[count.index]
   associate_public_ip_address = true
 
-  tags = {
-    Name = "${var.project_name}-web1"
-    AZ   = var.availability_zones[0]
-  }
-}
-
-# EC2 Instance 2 (AZ2)
-resource "aws_instance" "web2" {
-  ami                         = data.aws_ami.amazon_linux_2023.id
-  instance_type               = var.instance_type
-  subnet_id                   = var.subnet_ids[1]
-  associate_public_ip_address = true
+   user_data_base64 = base64encode(var.user_data)
+  
+ # user_data = var.user_data  
 
   tags = {
-    Name = "${var.project_name}-web2"
-    AZ   = var.availability_zones[1]
+    Name      = "${var.project_name}-web-${count.index + 1}"
+    Project   = var.project_name
+    StudentID = "L00203120"
+    AZ        = var.availability_zones[count.index]
   }
 }

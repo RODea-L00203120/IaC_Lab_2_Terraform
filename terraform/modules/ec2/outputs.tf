@@ -1,19 +1,14 @@
-output "web1_id" {
-  description = "Web server 1 instance ID"
-  value       = aws_instance.web1.id
+output "instance_ids" {
+  description = "List of EC2 instance IDs"
+  value       = aws_instance.web[*].id
 }
 
-output "web2_id" {
-  description = "Web server 2 instance ID"
-  value       = aws_instance.web2.id
+output "public_ips" {
+  description = "List of EC2 public IPs"
+  value       = aws_instance.web[*].public_ip
 }
 
-output "web1_public_ip" {
-  description = "Web server 1 public IP"
-  value       = aws_instance.web1.public_ip
-}
-
-output "web2_public_ip" {
-  description = "Web server 2 public IP"
-  value       = aws_instance.web2.public_ip
+output "private_ips" {
+  description = "List of EC2 private IPs"
+  value       = aws_instance.web[*].private_ip
 }
