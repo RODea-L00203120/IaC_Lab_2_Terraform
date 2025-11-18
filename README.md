@@ -100,9 +100,11 @@ The author intended modularity to be a core design element for this lab and incr
 
 A branch was created to implement two EC2 instances on public networks, from there the following could be implemented:
 
-- A VPC module, configurable via the `terraform/variables.tf` file which pass to the vpc module `terraform/modules/vpc/main.tf` as required. 
+- A VPC module, configurable via the `terraform/variables.tf` file which pass to the vpc module `terraform/modules/vpc/main.tf` as required.
 
-- An EC2 module which retrieves the latest AWS-Linux 2023 AMI and allows for configuration of instances via variables passed from the `terraform/variables.tf` file
+- A security_groups module `terraform/modules/security_groups/main.tf` following same design as above.
+
+- An EC2 module `terraform/modules/ec2/main.tf` which retrieves the latest AWS-Linux 2023 AMI and allows for configuration of instances via variables passed from the `terraform/variables.tf` file
 
 Examples of variables configured as per the brief instructions in `terraform/variables.tf` include: 
 
@@ -143,9 +145,9 @@ ____________________________________________
 
 Improvements to be made: Implement an automated version control for the flask app and install script either via S3 bucket or GitHub
 
-This somewhat monotlithic approach is potentially error prone in terms of configuration - for instance above the author realized that updating the python application folder obviously did not automatically update the user_data.sh script - therefore deployment was referencing an older hard coded version. 
+This somewhat monolithic approach is potentially error prone in terms of configuration - for instance above the author realized that updating the python application folder obviously did not automatically update the user_data.sh script - therefore deployment was referencing an older hard coded version.
 
 The author decided at this point to investigate the deployment using a Kubernetes - container based approach for reliability, scalability and deployment error prevention.
 
-This still provided a learning opportunity in IaC deployment automation. The project will be forked from here and further developed; with aim to re-use modules created where appropriate. 
+This still provided a learning opportunity in IaC deployment automation. The project will be forked from here and further developed; with aim to re-use modules created where appropriate.
 ______________________________________________________________________
