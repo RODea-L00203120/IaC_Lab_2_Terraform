@@ -7,3 +7,4 @@ output "ec2_sg_name" {
   description = "EC2 security group name"
   value       = aws_security_group.ec2.name
 }
+

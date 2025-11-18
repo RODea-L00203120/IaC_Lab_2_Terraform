@@ -127,3 +127,25 @@ variable "public_subnet_cidrs" {
 ```
 ## Stage 1: Conclusions
 
+Following successful formatting, validation, planning and apply from the container cli:
+![](screenshots/2025-11-18-20-33-22.png)
+
+Within AWS GUI:
+
+![](screenshots/2025-11-18-21-08-58.png)
+
+Accessing public facing IP(note IP differs to above due to minor bug fix and redeploy):
+
+![](screenshots/2025-11-18-21-22-33.png)
+![](screenshots/2025-11-18-21-24-51.png)
+
+____________________________________________
+
+Improvements to be made: Implement an automated version control for the flask app and install script either via S3 bucket or GitHub
+
+This somewhat monotlithic approach is potentially error prone in terms of configuration - for instance above the author realized that updating the python application folder obviously did not automatically update the user_data.sh script - therefore deployment was referencing an older hard coded version. 
+
+The author decided at this point to investigate the deployment using a Kubernetes - container based approach for reliability, scalability and deployment error prevention.
+
+This still provided a learning opportunity in IaC deployment automation. The project will be forked from here and further developed; with aim to re-use modules created where appropriate. 
+______________________________________________________________________
