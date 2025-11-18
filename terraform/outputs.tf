@@ -28,10 +28,20 @@ output "public_ips" {
   value       = module.ec2.public_ips
 }
 
+output "private_subnet_ids" {
+  description = "IDs of the private subnets"
+  value       = module.vpc.private_subnets
+}
+
+output "nat_gateway_ids" {
+  description = "IDs of NAT Gateways"
+  value       = module.vpc.nat_gateway_ids
+}
+
 # Student Information
 output "student_credentials" {
   description = "Student identification for project submission"
-  value = <<-EOT
+  value       = <<-EOT
   
   ================================
   STUDENT CREDENTIALS
@@ -39,7 +49,7 @@ output "student_credentials" {
   Name:           Ronan O'Dea
   Student Number: L00203120
   Repository:     https://github.com/RODea-L00203120/IaC_Lab_2_Terraform
-  Branch:         simple-approach-ec2
+  Branch:         single-cluster-eks
   ================================
   
   EOT

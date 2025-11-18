@@ -1,7 +1,7 @@
 terraform {
   cloud {
     organization = "iac-lab-rodea"
-    
+
     workspaces {
       name = "IaC_Lab_2_Terraform"
     }

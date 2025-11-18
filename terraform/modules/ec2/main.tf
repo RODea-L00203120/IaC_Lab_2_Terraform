@@ -23,7 +23,7 @@ resource "aws_instance" "web" {
   vpc_security_group_ids      = [var.security_group_id]
 
   user_data_base64 = base64encode(var.user_data)
-  
+
 
 
   tags = {
