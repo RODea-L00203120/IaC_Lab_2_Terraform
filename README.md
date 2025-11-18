@@ -16,43 +16,36 @@ The authors engagement in practitioner-based research in effort to compose a IaC
 graph TB
     subgraph Internet["Internet Layer"]
         User[User Browser]
-        S3["S3 Bucket - Terraform State"]
+        S3["S3 Bucket<br/>terraform-s3-l00203120-rod<br/>Terraform State + Lock"]
     end
     
-    subgraph VPC["AWS VPC 10.0.0.0/16"]
+    subgraph VPC["AWS VPC 10.0.0.0/16 - us-east-1"]
         IGW[Internet Gateway]
-        ALB[Application Load Balancer]
-        RDS[("RDS Multi-AZ<br/>PostgreSQL")]
         
-        subgraph AZ1["Availability Zone 1"]
+        subgraph AZ1["Availability Zone us-east-1a"]
             subgraph PubSub1["Public Subnet 10.0.1.0/24"]
-                NAT1[NAT Gateway]
-            end
-            subgraph PrivSub1["Private Subnet 10.0.10.0/24"]
-                EKS1["EKS Worker Nodes<br/>Flask App"]
+                EC2_1["EC2 Instance t3.micro<br/>Flask App + Nginx<br/>Gunicorn WSGI"]
             end
         end
         
-        subgraph AZ2["Availability Zone 2"]
+        subgraph AZ2["Availability Zone us-east-1b"]
             subgraph PubSub2["Public Subnet 10.0.2.0/24"]
-                NAT2[NAT Gateway]
-            end
-            subgraph PrivSub2["Private Subnet 10.0.20.0/24"]
-                EKS2["EKS Worker Nodes<br/>Flask App"]
+                EC2_2["EC2 Instance t3.micro<br/>Flask App + Nginx<br/>Gunicorn WSGI"]
             end
         end
+        
+        SG["Security Group<br/>Allow: HTTP (80), SSH (22)<br/>From: 0.0.0.0/0"]
     end
     
-    User -->|HTTPS| IGW
-    IGW --> ALB
-    ALB --> EKS1
-    ALB --> EKS2
-    EKS1 --> RDS
-    EKS2 --> RDS
-    EKS1 -.->|Outbound| NAT1
-    EKS2 -.->|Outbound| NAT2
-    NAT1 --> IGW
-    NAT2 --> IGW
+    User -->|HTTP Port 80| IGW
+    IGW --> PubSub1
+    IGW --> PubSub2
+    PubSub1 --> EC2_1
+    PubSub2 --> EC2_2
+    SG -.->|Attached| EC2_1
+    SG -.->|Attached| EC2_2
+    EC2_1 -.->|Outbound| IGW
+    EC2_2 -.->|Outbound| IGW
     
     style Internet fill:#f0f0f0,stroke:#333,stroke-width:2px
     style VPC fill:#fff9e6,stroke:#333,stroke-width:3px
@@ -60,28 +53,30 @@ graph TB
     style AZ2 fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
     style PubSub1 fill:#bbdefb,stroke:#1976d2
     style PubSub2 fill:#c8e6c9,stroke:#388e3c
-    style PrivSub1 fill:#90caf9,stroke:#1976d2
-    style PrivSub2 fill:#a5d6a7,stroke:#388e3c
-    style ALB fill:#ff9800,stroke:#333,stroke-width:2px
-    style RDS fill:#9c27b0,stroke:#333,stroke-width:2px,color:#fff
+    style EC2_1 fill:#ff9800,stroke:#333,stroke-width:2px
+    style EC2_2 fill:#ff9800,stroke:#333,stroke-width:2px
+    style IGW fill:#2196f3,stroke:#333,stroke-width:2px,color:#fff
     style S3 fill:#4caf50,stroke:#333,stroke-width:2px
+    style SG fill:#f44336,stroke:#333,stroke-width:2px,color:#fff
 ```
 
 ## Early Design decisions
 
 - Create a dev container for version locking, portability and maintainability.
 
-- Use terraform locally through the CLI, avoid vendor locked cloud implementation and instead store state configuration files on a private S3 bucket. Less provider dependence, similar security, greater flexibility and portability.
+- Use terraform locally through the CLI, avoid vendor locked cloud implementation and instead store state configuration files on a private S3 bucket. Less provider dependence, similar security, greater flexibility and portability. Until HCP stack configurations are required. 
 
-- Modular design for: VPC, ALB, EKS clusters, RDS & Security Group configuration
+- Modular reusable design as is effective, consider when simple, declarative approach may be better
 
-- Simple Python Flask App - Hello world to begin, then form submission to DB
+- Simple Python Flask App - Hello world to begin, then form submission; nothing complex to focus on infrastructure. 
 
 - Aiming to implement multi-cluster cluster approach however:
 
-1. Get EC2 instances working with correctly configured VPC, ALB, Security, RDS in own branch.
+1. Get EC2 instances working with correctly configured VPC, Security Groups, in own branch.
 
-2. Branch off  above to work on single-cluster EKS implementation
+2. Branch off  above to work on single-cluster EKS implementation with ALB applied 
+
+- (consideration for cost - validate -> plan ->apply > document evidence -> destroy)
 
 3. Branch off above to work on multi-cluster implementation
 
@@ -90,7 +85,7 @@ graph TB
 # State Tracking
 
 While of less concern as a solo developer, best practice indicates a method of tracking the state of terraform IaC changes is required when working with others to avoid conflicts, corruptions, race conditions etc. 
-Rather than rely on cloud tooling (Terraform HCP) to track state changes the author investigated alternatives and encountered the concept of provisioning a private, encrypted S3 bucket to store an organizations `terraform.tfstate` file. A script file is included which runs through this process. *Note: as this is container based the visible user name is the default docker debian container root*
+Rather than rely on cloud tooling (Terraform HCP) to track state changes the author investigated alternatives and encountered the concept of provisioning a private, encrypted S3 bucket to store an organizations `terraform.tfstate` file. A script file is included which runs through this process. *Note: as this is container based the visible user name is the default docker debian container root* 
 
 Below are evidence of this working:
 
@@ -130,5 +125,5 @@ variable "public_subnet_cidrs" {
   default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 ```
-
+## Stage 1: Conclusions
 
