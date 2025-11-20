@@ -38,6 +38,32 @@ output "nat_gateway_ids" {
   value       = module.vpc.nat_gateway_ids
 }
 
+# EKS Cluster Outputs
+output "eks_cluster_id" {
+  description = "EKS cluster ID"
+  value       = module.eks.cluster_id
+}
+
+output "eks_cluster_endpoint" {
+  description = "EKS cluster endpoint"
+  value       = module.eks.cluster_endpoint
+}
+
+output "eks_cluster_name" {
+  description = "EKS cluster name"
+  value       = module.eks.cluster_name
+}
+
+output "eks_cluster_security_group_id" {
+  description = "Security group ID attached to EKS cluster"
+  value       = module.eks.cluster_security_group_id
+}
+
+output "configure_kubectl" {
+  description = "Command to configure kubectl"
+  value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}"
+}
+
 # Student Information
 output "student_credentials" {
   description = "Student identification for project submission"

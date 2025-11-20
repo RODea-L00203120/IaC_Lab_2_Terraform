@@ -37,3 +37,40 @@ variable "enable_nat_gateway" {
 variable "single_nat_gateway" {
   default = true
 }
+
+# EKS Configuration
+variable "cluster_name" {
+  description = "EKS cluster name"
+  type        = string
+  default     = "feedback-app-eks"
+}
+
+variable "cluster_version" {
+  description = "Kubernetes version"
+  type        = string
+  default     = "1.31"
+}
+
+variable "node_instance_types" {
+  description = "Instance types for EKS nodes"
+  type        = list(string)
+  default     = ["t3.medium"]
+}
+
+variable "node_group_min_size" {
+  description = "Minimum number of EKS nodes"
+  type        = number
+  default     = 2
+}
+
+variable "node_group_max_size" {
+  description = "Maximum number of EKS nodes"
+  type        = number
+  default     = 4
+}
+
+variable "node_group_desired_size" {
+  description = "Desired number of EKS nodes"
+  type        = number
+  default     = 2
+}

@@ -10,91 +10,81 @@ The authors engagement in practitioner-based research in effort to compose a IaC
 
 - While the landing page is simplistic (a form), reliability, security, modularity and scalability are of concern and therefore the underlying architecture design aimed for is as follows:
 
-## Infrastructure Architecture
+## Infrastructure Architecture for Stage 2:
 
-```mermaid
-graph TB
-    subgraph Internet["Internet Layer"]
-        User[User Browser]
-        S3["S3 Bucket<br/>terraform-s3-l00203120-rod<br/>Terraform State + Lock"]
-    end
-    
-    subgraph VPC["AWS VPC 10.0.0.0/16 - us-east-1"]
-        IGW[Internet Gateway]
-        
-        subgraph AZ1["Availability Zone us-east-1a"]
-            subgraph PubSub1["Public Subnet 10.0.1.0/24"]
-                EC2_1["EC2 Instance t3.micro<br/>Flask App + Nginx<br/>Gunicorn WSGI"]
-            end
-        end
-        
-        subgraph AZ2["Availability Zone us-east-1b"]
-            subgraph PubSub2["Public Subnet 10.0.2.0/24"]
-                EC2_2["EC2 Instance t3.micro<br/>Flask App + Nginx<br/>Gunicorn WSGI"]
-            end
-        end
-        
-        SG["Security Group<br/>Allow: HTTP (80), SSH (22)<br/>From: 0.0.0.0/0"]
-    end
-    
-    User -->|HTTP Port 80| IGW
-    IGW --> PubSub1
-    IGW --> PubSub2
-    PubSub1 --> EC2_1
-    PubSub2 --> EC2_2
-    SG -.->|Attached| EC2_1
-    SG -.->|Attached| EC2_2
-    EC2_1 -.->|Outbound| IGW
-    EC2_2 -.->|Outbound| IGW
-    
-    style Internet fill:#f0f0f0,stroke:#333,stroke-width:2px
-    style VPC fill:#fff9e6,stroke:#333,stroke-width:3px
-    style AZ1 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style AZ2 fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    style PubSub1 fill:#bbdefb,stroke:#1976d2
-    style PubSub2 fill:#c8e6c9,stroke:#388e3c
-    style EC2_1 fill:#ff9800,stroke:#333,stroke-width:2px
-    style EC2_2 fill:#ff9800,stroke:#333,stroke-width:2px
-    style IGW fill:#2196f3,stroke:#333,stroke-width:2px,color:#fff
-    style S3 fill:#4caf50,stroke:#333,stroke-width:2px
-    style SG fill:#f44336,stroke:#333,stroke-width:2px,color:#fff
+To do.
+
+## Stage 2 Design decisions
+
+- Configured HCP Cloud Account to allow for single cluster approach and potentially use terraform stacks.
+
+(insert image)
+
+- Configured private sub-nets using same modular approach as before. Logic is:  `terraform/variables.tf` defines variables passed to `terraform/main.tf` which are passed to  `modules/vpc/main.tf` which are expected as defined in `modules/vpc/variables.tf`. A single NAT gateway is configured to allow next step.
+
+``` HCL
+# terraform/main.tf
+
+variable "private_subnet_cidrs" {
+  default = ["10.0.10.0/24", "10.0.20.0/24"]
+}
+variable "enable_nat_gateway" {
+  default = true
+}
+variable "single_nat_gateway" {
+  default = true
+}
+
 ```
 
-## Early Design decisions
+- Create EKS Module. Place EKS nodes on private sub-nets with a single NAT configured for access (two best practice but double the cost). 
 
-- Create a dev container for version locking, portability and maintainability.
+``` HCL
+ # EKS Configuration in `terraform/variables.tf`
+variable "cluster_name" {
+  description = "EKS cluster name"
+  type        = string
+  default     = "feedback-app-eks"
+}
 
-- Use terraform locally through the CLI, avoid vendor locked cloud implementation and instead store state configuration files on a private S3 bucket. Less provider dependence, similar security, greater flexibility and portability. Until HCP stack configurations are required. 
+variable "cluster_version" {
+  description = "Kubernetes version"
+  type        = string
+  default     = "1.31"
+}
 
-- Modular reusable design as is effective, consider when simple, declarative approach may be better
+variable "node_instance_types" {
+  description = "Instance types for EKS nodes"
+  type        = list(string)
+  default     = ["t3.medium"]
+}
 
-- Simple Python Flask App - Hello world to begin, then form submission; nothing complex to focus on infrastructure. 
+variable "node_group_min_size" {
+  description = "Minimum number of EKS nodes"
+  type        = number
+  default     = 2
+}
 
-- Aiming to implement multi-cluster cluster approach however:
+variable "node_group_max_size" {
+  description = "Maximum number of EKS nodes"
+  type        = number
+  default     = 4
+}
 
-1. Get EC2 instances working with correctly configured VPC, Security Groups, in own branch.
+variable "node_group_desired_size" {
+  description = "Desired number of EKS nodes"
+  type        = number
+  default     = 2
+}
+```
 
-2. Branch off  above to work on single-cluster EKS implementation with ALB applied 
+- Configure an ALB
 
-- (consideration for cost - validate -> plan ->apply > document evidence -> destroy)
+## State Tracking
 
-3. Branch off above to work on multi-cluster implementation
+HCP workspace now stores state - no manual configuration of S3 bucket and DynamoDB lock required. Somewhat locking in to vendor for future stack implementation.
 
-4. Merge most successful to main
-
-# State Tracking
-
-While of less concern as a solo developer, best practice indicates a method of tracking the state of terraform IaC changes is required when working with others to avoid conflicts, corruptions, race conditions etc. 
-Rather than rely on cloud tooling (Terraform HCP) to track state changes the author investigated alternatives and encountered the concept of provisioning a private, encrypted S3 bucket to store an organizations `terraform.tfstate` file. A script file is included which runs through this process. *Note: as this is container based the visible user name is the default docker debian container root* 
-
-Below are evidence of this working:
-
-![](screenshots/2025-11-16-16-33-35.png)
-
-![](screenshots/2025-11-16-15-05-21.png)
-
-
-## Stage 1: Simple Infrastructure set-up
+## Stage 2: Single Cluster EKS Infrastructure set-up
 
 The author intended modularity to be a core design element for this lab and incrementally developed the application.
 
@@ -106,7 +96,7 @@ A branch was created to implement two EC2 instances on public networks, from the
 
 - An EC2 module `terraform/modules/ec2/main.tf` which retrieves the latest AWS-Linux 2023 AMI and allows for configuration of instances via variables passed from the `terraform/variables.tf` file
 
-Examples of variables configured as per the brief instructions in `terraform/variables.tf` include: 
+Examples of variables configured as per the brief instructions in `terraform/variables.tf` include:
 
 ```hcl
 variable "vpc_cidr" {
@@ -127,27 +117,5 @@ variable "public_subnet_cidrs" {
   default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 ```
-## Stage 1: Conclusions
 
-Following successful formatting, validation, planning and apply from the container cli:
-![](screenshots/2025-11-18-20-33-22.png)
-
-Within AWS GUI:
-
-![](screenshots/2025-11-18-21-08-58.png)
-
-Accessing public facing IP(note IP differs to above due to minor bug fix and redeploy):
-
-![](screenshots/2025-11-18-21-22-33.png)
-![](screenshots/2025-11-18-21-24-51.png)
-
-____________________________________________
-
-Improvements to be made: Implement an automated version control for the flask app and install script either via S3 bucket or GitHub
-
-This somewhat monolithic approach is potentially error prone in terms of configuration - for instance above the author realized that updating the python application folder obviously did not automatically update the user_data.sh script - therefore deployment was referencing an older hard coded version.
-
-The author decided at this point to investigate the deployment using a Kubernetes - container based approach for reliability, scalability and deployment error prevention.
-
-This still provided a learning opportunity in IaC deployment automation. The project will be forked from here and further developed; with aim to re-use modules created where appropriate.
-______________________________________________________________________
+## Stage 2: Conclusions

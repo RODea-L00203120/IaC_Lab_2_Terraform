@@ -43,18 +43,37 @@ module "security_groups" {
 }
 
 
-module "ec2" {
-  source = "./modules/ec2"
+# module "ec2" {
+#  source = "./modules/ec2"
 
-  project_name       = var.project_name
-  instance_count     = 2
-  instance_type      = "t3.micro"
-  subnet_ids         = module.vpc.public_subnets
-  availability_zones = var.availability_zones
-  security_group_id  = module.security_groups.ec2_sg_id
+#  project_name       = var.project_name
+#  instance_count     = 2
+#  instance_type      = "t3.micro"
+#  subnet_ids         = module.vpc.public_subnets
+#  availability_zones = var.availability_zones
+#  security_group_id  = module.security_groups.ec2_sg_id
 
-  user_data = templatefile("${path.root}/../app/user_data.sh", {
-    flask_app_code = file("${path.root}/../app/app.py")
-  })
+#  user_data = templatefile("${path.root}/../app/user_data.sh", {
+#    flask_app_code = file("${path.root}/../app/app.py")
+#  })
+# }
+
+# EKS Cluster Module
+module "eks" {
+  source = "./modules/eks"
+
+  cluster_name    = var.cluster_name
+  cluster_version = var.cluster_version
+  
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnets
+
+  node_instance_types     = var.node_instance_types
+  node_group_min_size     = var.node_group_min_size
+  node_group_max_size     = var.node_group_max_size
+  node_group_desired_size = var.node_group_desired_size
+
+  project_name = var.project_name
+
+  depends_on = [module.vpc]
 }
-
