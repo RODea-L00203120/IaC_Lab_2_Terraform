@@ -61,6 +61,8 @@ module "security_groups" {
 # EKS Cluster Module
 module "eks" {
   source = "./modules/eks"
+  count  = var.enable_eks ? 1 : 0  # Only create if enabled
+
 
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
