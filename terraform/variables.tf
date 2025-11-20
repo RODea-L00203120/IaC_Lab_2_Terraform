@@ -39,10 +39,16 @@ variable "single_nat_gateway" {
 }
 
 # EKS Configuration
+variable "enable_eks" {
+  description = "Enable EKS cluster deployment"
+  type        = bool
+  default     = false  # Start with VPC only
+}
+
 variable "cluster_name" {
   description = "EKS cluster name"
   type        = string
-  default     = "feedback-app-eks"
+  default     = "app-"
 }
 
 variable "cluster_version" {

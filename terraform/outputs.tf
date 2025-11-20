@@ -18,15 +18,15 @@ output "internet_gateway_id" {
   value       = module.vpc.igw_id
 }
 
-output "instance_ids" {
-  description = "List of EC2 instance IDs"
-  value       = module.ec2.instance_ids
-}
+# output "instance_ids" {
+#  description = "List of EC2 instance IDs"
+#  value       = module.ec2.instance_ids
+# }
 
-output "public_ips" {
-  description = "List of EC2 public IPs"
-  value       = module.ec2.public_ips
-}
+# output "public_ips" {
+#  description = "List of EC2 public IPs"
+#  value       = module.ec2.public_ips
+# }
 
 output "private_subnet_ids" {
   description = "IDs of the private subnets"
@@ -38,30 +38,26 @@ output "nat_gateway_ids" {
   value       = module.vpc.nat_gateway_ids
 }
 
-# EKS Cluster Outputs
+
+# EKS Cluster Outputs - Only show if EKS enabled
 output "eks_cluster_id" {
   description = "EKS cluster ID"
-  value       = module.eks.cluster_id
+  value       = var.enable_eks ? module.eks[0].cluster_id : null
 }
 
 output "eks_cluster_endpoint" {
   description = "EKS cluster endpoint"
-  value       = module.eks.cluster_endpoint
+  value       = var.enable_eks ? module.eks[0].cluster_endpoint : null
 }
 
 output "eks_cluster_name" {
   description = "EKS cluster name"
-  value       = module.eks.cluster_name
-}
-
-output "eks_cluster_security_group_id" {
-  description = "Security group ID attached to EKS cluster"
-  value       = module.eks.cluster_security_group_id
+  value       = var.enable_eks ? module.eks[0].cluster_name : null
 }
 
 output "configure_kubectl" {
   description = "Command to configure kubectl"
-  value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}"
+  value       = var.enable_eks ? "aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks[0].cluster_name}" : "EKS not enabled"
 }
 
 # Student Information
