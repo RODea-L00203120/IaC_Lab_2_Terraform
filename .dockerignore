@@ -1,0 +1,8 @@
+.git
+.terraform
+terraform/
+screenshots/
+*.md
+.gitignore
+.vscode
+node_modules
