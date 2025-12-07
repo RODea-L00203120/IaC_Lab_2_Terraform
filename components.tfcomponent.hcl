@@ -2,7 +2,7 @@ component "vpc" {
   for_each = var.regions
   
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 6.0"  # Latest v6.x with AWS provider 6 fixes
+  version = "~> 5.0"
   
   inputs = {
     name = "feedback-app-vpc-${each.key}"
@@ -49,7 +49,7 @@ component "eks" {
   for_each = var.regions
   
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 21.0"  # Latest v21.x for AWS provider 6
+  version = "~> 20.0"
   
   inputs = {
     cluster_name    = "app-stack-${each.key}"
@@ -69,9 +69,6 @@ component "eks" {
         most_recent = true
       }
       vpc-cni = {
-        most_recent = true
-      }
-      eks-pod-identity-agent = {
         most_recent = true
       }
     }
