@@ -1,9 +1,10 @@
 identity_token "aws" {
   audience = ["aws.workload.identity"]
 }
-
+# Using OpenID Connect (OIDC) instead of static AWS credentials
 deployment "production" {
   inputs = {
+       # See iam-policy.json in project root for full permission set
     role_arn       = "arn:aws:iam::820198199907:role/HCP-Terraform-Stacks-Role"
     identity_token = identity_token.aws.jwt
     
@@ -24,5 +25,5 @@ deployment "production" {
     node_instance_types = ["t3.small"]
     node_count          = 2
   }
-  destroy = true  # ADD THIS LINE
+  destroy = true  # ADD/REMOVE THIS LINE TO PLAN/DESTROY
 }

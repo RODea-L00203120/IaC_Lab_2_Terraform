@@ -1,3 +1,4 @@
+# VPC component - rolled back to ~>5.0 to solve region/name issues
 component "vpc" {
   for_each = var.regions
   
@@ -45,6 +46,8 @@ component "vpc" {
   }
 }
 
+# EKS component creates Kubernetes 1.31 cluster 
+# with managed node groups in private subnets per region
 component "eks" {
   for_each = var.regions
   
@@ -97,6 +100,7 @@ component "eks" {
     }
   }
   
+# These were required for terraform stacks init to run
   providers = {
     aws       = provider.aws.configurations[each.key]
     tls       = provider.tls.default
@@ -104,10 +108,11 @@ component "eks" {
     time      = provider.time.default
     null      = provider.null.default
   }
-  
+  # don't create until VPC configured
   depends_on = [component.vpc]
 }
 
+# This wasn't really integrated due to time constraints but exists with working app in mind
 component "s3" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 4.0"
