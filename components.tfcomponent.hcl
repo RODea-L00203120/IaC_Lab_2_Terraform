@@ -117,6 +117,7 @@ component "eks" {
     tls       = provider.tls.this
     cloudinit = provider.cloudinit.this
     time      = provider.time.this
+    null      = provider.null.this
   }
 }
 

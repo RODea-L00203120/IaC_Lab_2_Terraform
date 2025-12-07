@@ -15,6 +15,10 @@ required_providers {
     source  = "hashicorp/time"
     version = "~> 0.13"
   }
+  null = {
+    source  = "hashicorp/null"
+    version = "~> 3.2"
+  }
 }
 
 # Multi-region providers for VPC/EKS
@@ -35,10 +39,10 @@ provider "aws" "configurations" {
   }
 }
 
-# Dedicated provider for S3 bucket (explicit region) one region for access - though not as robust
+# Dedicated provider for S3 bucket
 provider "aws" "s3" {
   config {
-    region = "us-east-1"  # Explicit region for S3
+    region = "us-east-1"
     
     default_tags {
       tags = {
@@ -54,3 +58,4 @@ provider "aws" "s3" {
 provider "tls" "this" {}
 provider "cloudinit" "this" {}
 provider "time" "this" {}
+provider "null" "this" {}
