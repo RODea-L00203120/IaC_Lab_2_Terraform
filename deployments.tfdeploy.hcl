@@ -24,4 +24,5 @@ deployment "production" {
     node_instance_types = ["t3.small"]
     node_count          = 2
   }
+  destroy = true  # ADD THIS LINE
 }
