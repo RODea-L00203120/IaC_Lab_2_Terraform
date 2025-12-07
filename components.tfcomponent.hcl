@@ -1,9 +1,8 @@
-# VPC Component - Creates networking infrastructure in each region
 component "vpc" {
   for_each = var.regions
   
-  source = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"  # Use latest 5.x (stable, compatible with AWS 6.x)
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 6.0"  # Latest v6.x with AWS provider 6 fixes
   
   inputs = {
     name = "feedback-app-vpc-${each.key}"
@@ -46,12 +45,11 @@ component "vpc" {
   }
 }
 
-# EKS Component - Creates Kubernetes clusters in each region
 component "eks" {
   for_each = var.regions
   
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"  # Stable v20.x, proven compatibility
+  version = "~> 21.0"  # Latest v21.x for AWS provider 6
   
   inputs = {
     cluster_name    = "app-stack-${each.key}"
@@ -71,6 +69,9 @@ component "eks" {
         most_recent = true
       }
       vpc-cni = {
+        most_recent = true
+      }
+      eks-pod-identity-agent = {
         most_recent = true
       }
     }
@@ -100,18 +101,19 @@ component "eks" {
   }
   
   providers = {
-    aws = provider.aws.configurations[each.key]
+    aws       = provider.aws.configurations[each.key]
+    tls       = provider.tls.default
+    cloudinit = provider.cloudinit.default
+    time      = provider.time.default
+    null      = provider.null.default
   }
   
-  depends_on = [
-    component.vpc
-  ]
+  depends_on = [component.vpc]
 }
 
-# S3 Component - Global submission storage bucket
 component "s3" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "~> 4.0"  # Latest stable
+  version = "~> 4.0"
   
   inputs = {
     bucket = "feedback-app-submissions-l00203120"
@@ -127,26 +129,6 @@ component "s3" {
         }
       }
     }
-    
-    lifecycle_rule = [
-      {
-        id      = "expire-old-submissions"
-        enabled = true
-        expiration = {
-          days = 90
-        }
-      }
-    ]
-    
-    cors_rule = [
-      {
-        allowed_headers = ["*"]
-        allowed_methods = ["GET", "PUT", "POST"]
-        allowed_origins = ["*"]
-        expose_headers  = ["ETag"]
-        max_age_seconds = 3000
-      }
-    ]
     
     tags = {
       Project   = "feedback-app"
