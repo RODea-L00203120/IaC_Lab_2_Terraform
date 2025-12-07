@@ -1,1 +1,0 @@
-ALB URL: http://k8s-default-flaskfee-72e6af97f9-6fb5122b3c9f00ed.elb.us-east-1.amazonaws.com
