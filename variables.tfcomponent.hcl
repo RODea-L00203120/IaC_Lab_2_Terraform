@@ -1,5 +1,5 @@
+# Regional configuration map
 variable "regions" {
-  description = "Map of regions for multi-region deployment"
   type = map(object({
     region   = string
     vpc_cidr = string
@@ -19,20 +19,31 @@ variable "regions" {
   }
 }
 
+# Cluster configuration
 variable "cluster_version" {
-  description = "Kubernetes version"
-  type        = string
-  default     = "1.34"
+  type    = string
+  default = "1.34"
 }
 
 variable "node_instance_types" {
-  description = "Instance types for EKS nodes"
-  type        = list(string)
-  default     = ["t3.small"]
+  type    = list(string)
+  default = ["t3.small"]
 }
 
 variable "node_count" {
-  description = "Number of nodes per cluster"
-  type        = number
-  default     = 2
+  type    = number
+  default = 2
+}
+
+# AWS Credentials (from variable set)
+variable "aws_access_key_id" {
+  type      = string
+  sensitive = true
+  ephemeral = true
+}
+
+variable "aws_secret_access_key" {
+  type      = string
+  sensitive = true
+  ephemeral = true
 }
