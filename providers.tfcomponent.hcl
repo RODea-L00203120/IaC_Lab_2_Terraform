@@ -1,57 +1,56 @@
-# Required Providers for All Components
 required_providers {
   aws = {
     source  = "hashicorp/aws"
-    version = "~> 6.0"  # Latest 6.x
-  }
-  cloudinit = {
-    source  = "hashicorp/cloudinit"
-    version = "~> 2.0"  # Latest 2.x
-  }
-  time = {
-    source  = "hashicorp/time"
-    version = "~> 0.13"  # Latest 0.13.x
+    version = "~> 6.25"
   }
   tls = {
     source  = "hashicorp/tls"
-    version = "~> 4.0"  # Latest 4.x
+    version = "~> 4.0"
   }
-  null = {
-    source  = "hashicorp/null"
-    version = "~> 3.0"  # Latest 3.x
+  cloudinit = {
+    source  = "hashicorp/cloudinit"
+    version = "~> 2.3"
+  }
+  time = {
+    source  = "hashicorp/time"
+    version = "~> 0.13"
   }
 }
 
-# AWS Provider Configuration
-provider "aws" "default" {
+# Multi-region providers for VPC/EKS
+provider "aws" "configurations" {
+  for_each = var.regions
+
   config {
-    region = "us-east-1"
+    region = each.value.region
     
     default_tags {
       tags = {
-        ManagedBy = "TerraformStacks"
+        Project   = "IaC-Lab-2-Stacks"
+        ManagedBy = "Terraform-Stacks"
         Student   = "L00203120"
+        Region    = each.value.region
       }
     }
   }
 }
 
-# CloudInit Provider
-provider "cloudinit" "default" {
-  config {}
+# Dedicated provider for S3 bucket (explicit region) one region for access - though not as robust
+provider "aws" "s3" {
+  config {
+    region = "us-east-1"  # Explicit region for S3
+    
+    default_tags {
+      tags = {
+        Project   = "IaC-Lab-2-Stacks"
+        ManagedBy = "Terraform-Stacks"
+        Student   = "L00203120"
+        Purpose   = "S3-Storage"
+      }
+    }
+  }
 }
 
-# Time Provider
-provider "time" "default" {
-  config {}
-}
-
-# TLS Provider
-provider "tls" "default" {
-  config {}
-}
-
-# Null Provider
-provider "null" "default" {
-  config {}
-}
+provider "tls" "this" {}
+provider "cloudinit" "this" {}
+provider "time" "this" {}

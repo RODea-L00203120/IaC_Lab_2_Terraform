@@ -1,57 +1,44 @@
-# VPC Outputs
-output "vpc_id" {
+output "regional_vpcs" {
+  description = "VPC IDs by region"
+  type        = map(string)
+  value = {
+    for k, vpc in component.vpc : k => vpc.vpc_id
+  }
+}
+
+output "cluster_names" {
+  description = "EKS cluster names by region"
+  type        = map(string)
+  value = {
+    for k, cluster in component.eks : k => cluster.cluster_name
+  }
+}
+
+output "cluster_endpoints" {
+  description = "EKS cluster endpoints by region"
+  type        = map(string)
+  value = {
+    for k, cluster in component.eks : k => cluster.cluster_endpoint
+  }
+}
+
+output "kubeconfig_commands" {
+  description = "Commands to configure kubectl for each cluster"
+  type        = map(string)
+  value = {
+    for k, cluster in component.eks : 
+      k => "aws eks update-kubeconfig --region ${var.regions[k].region} --name ${cluster.cluster_name}"
+  }
+}
+
+output "s3_bucket" {
+  description = "S3 bucket for feedback submissions"
   type        = string
-  value       = component.vpc.vpc_id
-  description = "VPC ID"
+  value       = component.s3.s3_bucket_id
 }
 
-output "public_subnet_ids" {
-  type        = list(string)
-  value       = component.vpc.public_subnets
-  description = "Public subnet IDs"
-}
-
-output "private_subnet_ids" {
-  type        = list(string)
-  value       = component.vpc.private_subnets
-  description = "Private subnet IDs"
-}
-
-# EKS Outputs
-output "eks_cluster_id" {
+output "s3_bucket_region" {
+  description = "S3 bucket region"
   type        = string
-  value       = component.eks.cluster_id
-  description = "EKS cluster ID"
-}
-
-output "eks_cluster_endpoint" {
-  type        = string
-  value       = component.eks.cluster_endpoint
-  description = "EKS cluster endpoint"
-}
-
-output "eks_cluster_name" {
-  type        = string
-  value       = component.eks.cluster_name
-  description = "EKS cluster name"
-}
-
-# S3 Outputs
-output "feedback_bucket_id" {
-  type        = string
-  value       = component.feedback_bucket.s3_bucket_id
-  description = "S3 bucket name for feedback storage"
-}
-
-output "feedback_bucket_arn" {
-  type        = string
-  value       = component.feedback_bucket.s3_bucket_arn
-  description = "S3 bucket ARN"
-}
-
-# Helper Output
-output "configure_kubectl" {
-  type        = string
-  value       = "aws eks update-kubeconfig --region us-east-1 --name ${component.eks.cluster_name}"
-  description = "Command to configure kubectl"
+  value       = "us-east-1"
 }
