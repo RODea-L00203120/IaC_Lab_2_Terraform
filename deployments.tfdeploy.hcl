@@ -1,17 +1,8 @@
-# Reference AWS credentials from variable set
-store "varset" "aws_creds" {
-  id       = "varset-EdCqUys7PmwKJRbh"
-  category = "env"
-}
-
-# Multi-Region Production Deployment
 deployment "production" {
   inputs = {
-    # Pass credentials from variable set to providers
-    aws_access_key_id     = store.varset.aws_creds.AWS_ACCESS_KEY_ID
-    aws_secret_access_key = store.varset.aws_creds.AWS_SECRET_ACCESS_KEY
+    aws_access_key_id     = var.aws_access_key_id
+    aws_secret_access_key = var.aws_secret_access_key
     
-    # Regional configuration
     regions = {
       east = {
         region   = "us-east-1"
@@ -24,8 +15,20 @@ deployment "production" {
         azs      = ["us-west-2a", "us-west-2b"]
       }
     }
-    cluster_version      = "1.34"
+    
+    cluster_version      = "1.31"
     node_instance_types  = ["t3.small"]
-    node_count           = 2
+    node_count          = 2
   }
+}
+
+variable "aws_access_key_id" {
+  type      = string
+  ephemeral = true
+}
+
+variable "aws_secret_access_key" {
+  type      = string
+  sensitive = true
+  ephemeral = true
 }

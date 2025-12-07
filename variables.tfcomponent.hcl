@@ -1,49 +1,39 @@
-# Regional configuration map
+variable "aws_access_key_id" {
+  type        = string
+  description = "AWS Access Key ID"
+  ephemeral   = true
+}
+
+variable "aws_secret_access_key" {
+  type        = string
+  description = "AWS Secret Access Key"
+  sensitive   = true
+  ephemeral   = true
+}
+
 variable "regions" {
   type = map(object({
     region   = string
     vpc_cidr = string
     azs      = list(string)
   }))
-  default = {
-    east = {
-      region   = "us-east-1"
-      vpc_cidr = "10.0.0.0/16"
-      azs      = ["us-east-1a", "us-east-1b"]
-    }
-    west = {
-      region   = "us-west-2"
-      vpc_cidr = "10.1.0.0/16"
-      azs      = ["us-west-2a", "us-west-2b"]
-    }
-  }
+  description = "Regional configuration"
 }
 
-# Cluster configuration
 variable "cluster_version" {
-  type    = string
-  default = "1.34"
+  type        = string
+  description = "Kubernetes version"
+  default     = "1.31"
 }
 
 variable "node_instance_types" {
-  type    = list(string)
-  default = ["t3.small"]
+  type        = list(string)
+  description = "Instance types for nodes"
+  default     = ["t3.small"]
 }
 
 variable "node_count" {
-  type    = number
-  default = 2
-}
-
-# AWS Credentials (from variable set)
-variable "aws_access_key_id" {
-  type      = string
-  sensitive = true
-  ephemeral = true
-}
-
-variable "aws_secret_access_key" {
-  type      = string
-  sensitive = true
-  ephemeral = true
+  type        = number
+  description = "Number of nodes per region"
+  default     = 2
 }
