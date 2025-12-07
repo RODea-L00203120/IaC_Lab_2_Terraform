@@ -24,17 +24,23 @@ required_providers {
 provider "aws" "configurations" {
   for_each = var.regions
   config {
-    region     = each.value.region
-    access_key = var.aws_access_key_id
-    secret_key = var.aws_secret_access_key
+    region = each.value.region
+    
+    assume_role_with_web_identity {
+      role_arn           = var.aws_role_arn
+      web_identity_token = identity_token.aws.jwt
+    }
   }
 }
 
 provider "aws" "s3" {
   config {
-    region     = "us-east-1"
-    access_key = var.aws_access_key_id
-    secret_key = var.aws_secret_access_key
+    region = "us-east-1"
+    
+    assume_role_with_web_identity {
+      role_arn           = var.aws_role_arn
+      web_identity_token = identity_token.aws.jwt
+    }
   }
 }
 

@@ -1,14 +1,6 @@
-variable "aws_access_key_id" {
+variable "aws_role_arn" {
   type        = string
-  description = "AWS Access Key ID"
-  ephemeral   = true
-}
-
-variable "aws_secret_access_key" {
-  type        = string
-  description = "AWS Secret Access Key"
-  sensitive   = true
-  ephemeral   = true
+  description = "IAM role ARN for HCP to assume via OIDC"
 }
 
 variable "regions" {
@@ -17,7 +9,7 @@ variable "regions" {
     vpc_cidr = string
     azs      = list(string)
   }))
-  description = "Regional configuration"
+  description = "Regional configuration for multi-region deployment"
 }
 
 variable "cluster_version" {
@@ -28,7 +20,7 @@ variable "cluster_version" {
 
 variable "node_instance_types" {
   type        = list(string)
-  description = "Instance types for nodes"
+  description = "Instance types for EKS nodes"
   default     = ["t3.small"]
 }
 
