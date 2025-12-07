@@ -1,3 +1,9 @@
+# Reference AWS credentials from variable set
+store "varset" "aws_creds" {
+  id       = "varset-EdCqUys7PmwKJRbh"
+  category = "env"
+}
+
 # Multi-Region Production Deployment
 deployment "production" {
   inputs = {
