@@ -18,6 +18,7 @@ The authors engagement in practitioner-based research in effort to compose a IaC
 
 - Configured HCP Cloud Account to allow for single cluster approach and potentially use terraform stacks.
 
+![](screenshots/phase2/2025-11-18-22-14-08.png)
 
 - Configured private sub-nets using same modular approach as before. Logic is:  `terraform/variables.tf` defines variables passed to `terraform/main.tf` which are passed to  `modules/vpc/main.tf` which are expected as defined in `modules/vpc/variables.tf`. A single NAT gateway is configured to allow next step.
 
@@ -77,44 +78,165 @@ variable "node_group_desired_size" {
 }
 ```
 
-- Configure an ALB
+### AWS Load Balancer Controller Integration
 
-## State Tracking
+Instead of manually creating an ALB module, Phase 2 uses **Kubernetes-native load balancing**:
 
-HCP workspace now stores state - no manual configuration of S3 bucket and DynamoDB lock required. Somewhat locking in to vendor for future stack implementation.
+- Installed AWS Load Balancer Controller via Helm
+- Kubernetes Service type `LoadBalancer` automatically provisions ALB
+- Controller manages ALB lifecycle (create, update, delete)
+- Benefits: Better integration, automatic updates, Kubernetes-native workflow
+```yaml
+# k8s/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-feedback-app
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+spec:
+  type: LoadBalancer  # Creates ALB automatically
+  selector:
+    app: flask-feedback-app
+  ports:
+  - port: 80
+    targetPort: 5000
+```
 
-## Stage 2: Single Cluster EKS Infrastructure set-up
+**Installation:**
+```bash
+# Created IAM policy and service account with IRSA
+# Installed controller via Helm chart
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+    -n kube-system \
+    --set clusterName=app- \
+    --set serviceAccount.name=aws-load-balancer-controller
+```
+## Application Containerization
 
-The author intended modularity to be a core design element for this lab and incrementally developed the application.
+### Dockerfile Creation
 
-A branch was created to implement two EC2 instances on public networks, from there the following could be implemented:
+Containerized the Flask application for Kubernetes deployment:
+```dockerfile
+FROM python:3.11-slim
 
-- A VPC module, configurable via the `terraform/variables.tf` file which pass to the vpc module `terraform/modules/vpc/main.tf` as required.
+WORKDIR /app
 
-- A security_groups module `terraform/modules/security_groups/main.tf` following same design as above.
+COPY app/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-- An EC2 module `terraform/modules/ec2/main.tf` which retrieves the latest AWS-Linux 2023 AMI and allows for configuration of instances via variables passed from the `terraform/variables.tf` file
+COPY app/app.py .
+COPY app/templates/ templates/
 
-Examples of variables configured as per the brief instructions in `terraform/variables.tf` include:
+EXPOSE 5000
 
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "app:app"]
+```
+
+**Key decisions:**
+- **Python 3.11-slim**: Smaller image size (~150MB vs 1GB+ with full Python)
+- **Gunicorn**: Production WSGI server (2 workers for t3.small nodes)
+- **Multi-stage not needed**: Simple app, minimal dependencies
+
+### Amazon ECR (Elastic Container Registry)
+```bash
+# Created repository
+aws ecr create-repository --repository-name flask-feedback-app
+
+# Built and tagged image
+docker build -t flask-feedback-app:v2 .
+docker tag flask-feedback-app:v2 \
+    820198199907.dkr.ecr.us-east-1.amazonaws.com/flask-feedback-app:v2
+
+# Pushed to ECR
+docker push 820198199907.dkr.ecr.us-east-1.amazonaws.com/flask-feedback-app:v2
+```
+## Kubernetes Deployment Strategy
+
+### Deployment Manifest
+```yaml
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-feedback-app
+spec:
+  replicas: 2  # Multi-instance for HA
+  selector:
+    matchLabels:
+      app: flask-feedback-app
+  template:
+    spec:
+      containers:
+      - name: flask
+        image: 820198199907.dkr.ecr.us-east-1.amazonaws.com/flask-feedback-app:v2
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 5
+```
+
+**Design Decisions:**
+- **2 Replicas**: High availability across 2 AZs
+- **Resource Limits**: Prevent pod from consuming all node resources
+- **Health Probes**: Kubernetes automatically restarts unhealthy pods
+- **Liveness Probe**: Checks if app is responsive (restart if not)
+- **Readiness Probe**: Checks if pod ready to receive traffic
+
+### Key Configuration Changes for Phase 2
+
+**Enable EKS Deployment:**
 ```hcl
-variable "vpc_cidr" {
-  description = "CIDR block for VPC"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "availability_zones" {
-  description = "List of availability zones"
-  type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
-}
-
-variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets"
-  type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+# terraform/variables.tf
+variable "enable_eks" {
+  description = "Enable EKS cluster deployment"
+  type        = bool
+  default     = false  # Set to true to deploy EKS
 }
 ```
 
-## Stage 2: Conclusions
+**Instance Type Adjustment:**
+```hcl
+# Changed from t3.medium to t3.small for educational account
+variable "node_instance_types" {
+  default = ["t3.small"]  # Free tier eligible
+}
+```
+
+**Staged Deployment Process:**
+1. **Stage 1**: Deploy with `enable_eks = false` (VPC + NAT only)
+2. **Stage 2**: Set `enable_eks = true` via HCP Terraform UI variables
+3. Trigger new plan and apply
+
+This two-stage approach resolves EKS module count dependencies without using `-target` flag.
+
+### State Tracking
+
+HCP workspace now stores state - no manual configuration of S3 bucket and DynamoDB lock required. Somewhat locking in to vendor for future stack implementation.
+
+### Security Improvements
+
+Phase 2 provides better security posture:
+- Application in private subnets (not directly accessible)
+- No SSH required (kubectl for management)
+- IAM Roles for Service Accounts (granular permissions)
+- Network policies possible (future enhancement)
+
+
+## Stage 2: Conclusions & Deployment Screentshots
