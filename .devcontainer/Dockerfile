@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     libpq-dev \
     gcc \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Terraform
@@ -33,7 +34,23 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
     && rm kubectl
 
-# Install Python packages
-RUN pip install --no-cache-dir flask psycopg2-binary boto3
+# Install Helm
+RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# Install eksctl
+RUN curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" \
+    && tar -xzf eksctl_Linux_amd64.tar.gz \
+    && mv eksctl /usr/local/bin/ \
+    && rm eksctl_Linux_amd64.tar.gz
+
+# Install Docker CLI
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && apt-get update \
+    && apt-get install -y docker-ce-cli \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages (add gunicorn for Flask deployment)
+RUN pip install --no-cache-dir flask gunicorn psycopg2-binary boto3
 
 WORKDIR /workspace
