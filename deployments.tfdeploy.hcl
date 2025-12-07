@@ -7,6 +7,11 @@ store "varset" "aws_creds" {
 # Multi-Region Production Deployment
 deployment "production" {
   inputs = {
+    # Pass credentials from variable set to providers
+    aws_access_key_id     = store.varset.aws_creds.AWS_ACCESS_KEY_ID
+    aws_secret_access_key = store.varset.aws_creds.AWS_SECRET_ACCESS_KEY
+    
+    # Regional configuration
     regions = {
       east = {
         region   = "us-east-1"

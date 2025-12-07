@@ -1,60 +1,49 @@
-required_providers {
-  aws = {
-    source  = "hashicorp/aws"
-    version = "~> 6.25"
-  }
-  tls = {
-    source  = "hashicorp/tls"
-    version = "~> 4.0"
-  }
-  cloudinit = {
-    source  = "hashicorp/cloudinit"
-    version = "~> 2.3"
-  }
-  time = {
-    source  = "hashicorp/time"
-    version = "~> 0.13"
-  }
-  null = {
-    source  = "hashicorp/null"
-    version = "~> 3.2"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.25"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    cloudinit = {
+      source  = "hashicorp/cloudinit"
+      version = "~> 2.3"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
   }
 }
 
-# Multi-region providers for VPC/EKS
+# Regional AWS providers (for VPC and EKS)
 provider "aws" "configurations" {
   for_each = var.regions
-
+  
   config {
-    region = each.value.region
-    
-    default_tags {
-      tags = {
-        Project   = "IaC-Lab-2-Stacks"
-        ManagedBy = "Terraform-Stacks"
-        Student   = "L00203120"
-        Region    = each.value.region
-      }
-    }
+    region     = each.value.region
+    access_key = var.aws_access_key_id
+    secret_key = var.aws_secret_access_key
   }
 }
 
-# Dedicated provider for S3 bucket
+# Dedicated provider for S3 bucket in us-east-1
 provider "aws" "s3" {
   config {
-    region = "us-east-1"
-    
-    default_tags {
-      tags = {
-        Project   = "IaC-Lab-2-Stacks"
-        ManagedBy = "Terraform-Stacks"
-        Student   = "L00203120"
-        Purpose   = "S3-Storage"
-      }
-    }
+    region     = "us-east-1"
+    access_key = var.aws_access_key_id
+    secret_key = var.aws_secret_access_key
   }
 }
 
+# Utility providers
 provider "tls" "this" {}
 provider "cloudinit" "this" {}
 provider "time" "this" {}

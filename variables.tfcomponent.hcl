@@ -47,3 +47,16 @@ variable "aws_secret_access_key" {
   sensitive = true
   ephemeral = true
 }
+
+# AWS Credentials (from variable set)
+variable "aws_access_key_id" {
+  type      = string
+  sensitive = true
+  ephemeral = true
+}
+
+variable "aws_secret_access_key" {
+  type      = string
+  sensitive = true
+  ephemeral = true
+}
