@@ -1,7 +1,10 @@
+identity_token "aws" {
+  audience = ["aws.workload.identity"]
+}
+
 deployment "production" {
   inputs = {
-    aws_access_key_id     = var.aws_access_key_id
-    aws_secret_access_key = var.aws_secret_access_key
+    aws_role_arn = "arn:aws:iam::820198199907:role/HCP-Terraform-Stacks-Role"
     
     regions = {
       east = {
@@ -16,19 +19,8 @@ deployment "production" {
       }
     }
     
-    cluster_version      = "1.31"
-    node_instance_types  = ["t3.small"]
+    cluster_version     = "1.31"
+    node_instance_types = ["t3.small"]
     node_count          = 2
   }
-}
-
-variable "aws_access_key_id" {
-  type      = string
-  ephemeral = true
-}
-
-variable "aws_secret_access_key" {
-  type      = string
-  sensitive = true
-  ephemeral = true
 }
