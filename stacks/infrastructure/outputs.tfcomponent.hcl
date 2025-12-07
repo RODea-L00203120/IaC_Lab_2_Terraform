@@ -22,3 +22,7 @@ output "student_info" {
   type  = string
   value = "Deployed by L00203120 using Terraform Stacks v1.14.0"
 }
+output "feedback_bucket_name" {
+  type  = string
+  value = component.feedback_bucket.bucket_name
+}
