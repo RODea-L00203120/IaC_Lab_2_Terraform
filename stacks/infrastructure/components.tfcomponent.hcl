@@ -104,14 +104,32 @@ component "eks" {
 
 # S3 Bucket for Feedback Storage
 component "feedback_bucket" {
-  source = "./modules/s3"
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "~> 5.0"
   
   providers = {
     aws = provider.aws.default
   }
   
   inputs = {
-    bucket_name = "feedback-app-submissions-l00203120"
+    bucket = "feedback-app-submissions-l00203120"
+    
+    versioning = {
+      enabled = true
+    }
+    
+    server_side_encryption_configuration = {
+      rule = {
+        apply_server_side_encryption_by_default = {
+          sse_algorithm = "AES256"
+        }
+      }
+    }
+    
+    block_public_acls       = true
+    block_public_policy     = true
+    ignore_public_acls      = true
+    restrict_public_buckets = true
     
     tags = {
       Project   = "IaC-Lab-2"
