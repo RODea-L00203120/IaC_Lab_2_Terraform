@@ -4,7 +4,8 @@ identity_token "aws" {
 
 deployment "production" {
   inputs = {
-    aws_role_arn = "arn:aws:iam::820198199907:role/HCP-Terraform-Stacks-Role"
+    role_arn       = "arn:aws:iam::820198199907:role/HCP-Terraform-Stacks-Role"
+    identity_token = identity_token.aws.jwt
     
     regions = {
       east = {

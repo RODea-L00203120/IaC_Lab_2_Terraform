@@ -27,8 +27,8 @@ provider "aws" "configurations" {
     region = each.value.region
     
     assume_role_with_web_identity {
-      role_arn           = var.aws_role_arn
-      web_identity_token = identity_token.aws.jwt
+      role_arn           = var.role_arn
+      web_identity_token = var.identity_token
     }
   }
 }
@@ -38,8 +38,8 @@ provider "aws" "s3" {
     region = "us-east-1"
     
     assume_role_with_web_identity {
-      role_arn           = var.aws_role_arn
-      web_identity_token = identity_token.aws.jwt
+      role_arn           = var.role_arn
+      web_identity_token = var.identity_token
     }
   }
 }

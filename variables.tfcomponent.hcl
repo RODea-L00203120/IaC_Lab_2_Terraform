@@ -1,6 +1,12 @@
-variable "aws_role_arn" {
+variable "role_arn" {
   type        = string
-  description = "IAM role ARN for HCP to assume via OIDC"
+  description = "IAM role ARN for OIDC authentication"
+}
+
+variable "identity_token" {
+  type        = string
+  ephemeral   = true
+  description = "JWT token for OIDC authentication"
 }
 
 variable "regions" {
