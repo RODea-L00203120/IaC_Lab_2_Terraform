@@ -46,3 +46,7 @@ Thumbs.db
 # SSH
 id_rsa*
 known_hosts
+
+# Archive files (too large for HCP)
+archive/old-deployment-methods/infrastructure-graph.png
+archive/old-deployment-methods/infrastructure-graph.dot
