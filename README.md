@@ -12,13 +12,12 @@ The authors engagement in practitioner-based research in effort to compose a IaC
 
 ## Infrastructure Architecture for Stage 2:
 
-To do.
+![alt text](screenshots/phase2/infra-graph2.png)
 
 ## Stage 2 Design decisions
 
 - Configured HCP Cloud Account to allow for single cluster approach and potentially use terraform stacks.
 
-(insert image)
 
 - Configured private sub-nets using same modular approach as before. Logic is:  `terraform/variables.tf` defines variables passed to `terraform/main.tf` which are passed to  `modules/vpc/main.tf` which are expected as defined in `modules/vpc/variables.tf`. A single NAT gateway is configured to allow next step.
 
