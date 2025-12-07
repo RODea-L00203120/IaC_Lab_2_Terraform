@@ -240,3 +240,80 @@ Phase 2 provides better security posture:
 
 
 ## Stage 2: Conclusions & Deployment Screentshots
+
+### Deployment Process
+
+**Stage 1: VPC Infrastructure (enable_eks = false)**
+
+*Figure 1: HCP Terraform planning VPC infrastructure - 23 resources*
+![](screenshots/phase2/vpcplan.png)
+
+*Figure 2: VPC deployment complete with private subnets and NAT Gateway*
+![](screenshots/phase2/vpcplan.png)
+
+
+**Stage 2: EKS Cluster (enable_eks = true)**
+
+*Figure 3: HCP Terraform adding EKS cluster - 40 additional resources*
+![HCP Terraform EKS Plan](screenshots/phase2/eksdeploy.png)
+
+
+### Infrastructure Verification
+
+**AWS Console - Networking:**
+*Figure 4: VPC dashboard showing feedback-app-vpc (10.0.0.0/16)*
+
+![VPC Overview](screenshots/phase2/vpcdash.png)
+
+*Figure 5: VPC resource map - 4 subnets (2 public, 2 private) across 2 AZs*
+![VPC Details](screenshots/phase2/vpcdetails.png)
+
+*Figure 6: Single NAT Gateway in public subnet (cost optimization)*
+![NAT Gateway](screenshots/phase2/nat.png)
+
+
+**AWS Console - EKS:**
+*Figure 7: EKS cluster "app-" active with Kubernetes 1.31*
+![EKS Cluster](screenshots/phase2/eks1.png)
+
+*Figure 8: 2 worker nodes (t3.small) across us-east-1a and us-east-1b*
+![EKS Nodes](screenshots/phase2/eks2.png)
+
+*Figure 9: EC2 instances running as EKS worker nodes*
+![EC2 Instances](screenshots/phase2/ec2_instances.png)
+
+
+**AWS Console - Load Balancing:**
+*Figure 10: Network Load Balancer automatically provisioned by K8s Service*
+![ALB Created by Kubernetes](screenshots/phase2/alb.png)
+
+
+### Application Deployment
+**Kubernetes Verification:**
+
+*Figure 11: kubectl showing 2 Ready nodes in EKS cluster*
+
+
+![kubectl nodes](screenshots/phase2/nodes_ready.png)
+
+
+**Application Running:**
+*Figure 12: Flask application accessible via ALB*
+
+![Flask App Working](screenshots/phase2/apprunningonekscluster.png)
+
+
+**Load Balancing Verified:** Refreshing the page eventualy shows different pod hostnames, confirming traffic distribution across both pods.
+
+
+### Final Thoughts
+
+Phase 2 demonstrates evolution from traditional (EC2) to cloud-native (EKS) architecture. While more expensive and complex, EKS provides foundation for modern applications requiring scalability, configuarable networking modules  and the potential for complex orchestration.
+
+However, the multistage manual deployment via the HCP console and variable switching is cumbersome 
+
+![Variable change](screenshots/phase2/variable.png)
+
+
+
+**Next Steps:** Phase 3 will implement Terraform Stacks; hopefully reducing overall complexity and allowing for final configuration to meet assignment criteria. 
